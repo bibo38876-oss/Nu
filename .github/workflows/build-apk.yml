@@ -1,17 +1,17 @@
 name: Build NUMIDIA APK
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout project
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -19,34 +19,28 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
 
-      - name: Install required Android SDK
+      - name: Install Android SDK 36.1
         run: |
-          sdkmanager "platform-tools"
-          sdkmanager "platforms;android-36"
-          sdkmanager "build-tools;36.0.0"
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Extract NUMIDIA project
-        run: |
-          rm -rf numidia-project
-          mkdir numidia-project
-          unzip -q numidia.zip -d numidia-project
-
-      - name: Install Gradle
+      - name: Install Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
 
       - name: Build Debug APK
-        working-directory: numidia-project
-        run: gradle assembleDebug --stacktrace
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: NUMIDIA-debug-APK
-          path: numidia-project/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          name: NUMIDIA-debug
+          path: app/build/outputs/apk/debug/*.apk
