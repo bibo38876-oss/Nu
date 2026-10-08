@@ -33,12 +33,23 @@ jobs:
           sdkmanager "platforms;android-36"
           sdkmanager "build-tools;36.0.0"
 
-      - name: Setup Gradle 9.3.1
+      - name: Extract NUMIDIA
+        run: |
+          mkdir -p numidia
+          unzip -q numidia.zip -d numidia
+
+      - name: Show extracted project
+        run: |
+          echo "=== Extracted NUMIDIA ==="
+          find numidia -maxdepth 2 -type f | head -100
+
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '9.3.1'
 
-      - name: Build Debug APK
+      - name: Build NUMIDIA APK
+        working-directory: ./numidia
         run: |
           gradle --no-daemon assembleDebug
 
@@ -46,5 +57,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: NUMIDIA-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: numidia/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
