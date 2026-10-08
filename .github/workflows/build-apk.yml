@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout project
         uses: actions/checkout@v6
 
@@ -37,6 +38,20 @@ jobs:
         run: |
           mkdir -p numidia
           unzip -q numidia.zip -d numidia
+
+      - name: Create debug keystore
+        working-directory: ./numidia
+        run: |
+          keytool -genkeypair \
+            -v \
+            -keystore debug.keystore \
+            -storepass android \
+            -keypass android \
+            -alias androiddebugkey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Show extracted project
         run: |
